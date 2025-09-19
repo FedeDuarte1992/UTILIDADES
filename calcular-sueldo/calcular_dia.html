@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencia y Salario</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HEADER DE NAVEGACIÓN -->
+    <header class="main-header animated-fadein">
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link nav-logo">Inicio</a>
+            <a href="calculo_hora.html" class="nav-link">Calcular por hora</a>
+            <a href="calcular_dia.html" class="nav-link active">Calcular por día</a>
+            <a href="calcular_calendario.html" class="nav-link">Calcular calendario</a>
+        </nav>
+    </header>
+    <div class="container animated-fadein">
+        <h1 class="main-title">Control de Asistencia y Salario</h1>
+        <div id="editing-message" style="display:none;">
+            Estás editando el día: <span id="editing-date-display"></span>. Por favor, selecciona la información correcta.
+            <div class="btn-group">
+                <button class="secondary" onclick="cancelEditing()">Cancelar Edición</button>
+                <button class="delete-btn" id="delete-record-btn" onclick="deleteRecord()" style="display:none;">Eliminar Registro</button>
+            </div>
+        </div>
+        <div id="step-select-turno" class="step-box">
+            <p>¿En qué turno estás trabajando hoy?</p>
+            <div class="btn-group">
+                <button class="secondary" onclick="selectTurno('manana')">Mañana (06hs)</button>
+                <button class="secondary" onclick="selectTurno('tarde')">Tarde (14hs)</button>
+                <button class="secondary" onclick="selectTurno('noche')">Noche (22hs)</button>
+                <button class="secondary holiday-button" onclick="selectTurno('feriado')">Feriado (8hs normales)</button>
+            </div>
+        </div>
+        <div class="calendar-container animated-fadein">
+        <div class="calendar-header">
+            <button onclick="changeMonth(-1)">&#9664;</button>
+            <h3 id="current-month-year"></h3>
+            <button onclick="changeMonth(1)">&#9654;</button>
+        </div>
+        <div class="calendar-grid" id="calendar-weekdays">
+            <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+        </div>
+        <div class="calendar-grid" id="calendar-days"></div>
+        <button id="open-multi-day-modal-btn" style="display: none; margin-top: 15px;" onclick="openMultiDayScheduleModal()">
+            Aplicar Horario a Días Seleccionados (<span id="selected-days-count">0</span>)
+        </button>
+    </div>
+        <div id="step-fichaje-status" class="step-box" style="display: none;">
+            <p>¿Fichaste temprano o tarde?</p>
+            <div class="btn-group">
+                <button onclick="fichajeStatus('temprano')">Temprano</button>
+                <button class="late" onclick="fichajeStatus('tarde')">Tarde</button>
+            </div>
+        </div>
+        <div id="step-input-hora" class="step-box" style="display: none;">
+            <p>Ingresa la hora exacta de tu ingreso:</p>
+            <div class="input-group">
+                <input type="time" id="input-hora-ingreso">
+            </div>
+            <div class="btn-group">
+                <button onclick="registerCustomEntryTime()">Registrar Hora</button>
+            </div>
+        </div>
+        <div id="step-select-category" class="step-box" style="display: none;">
+            <p>Por favor, selecciona tu categoría:</p>
+            <div class="btn-group">
+                <button class="category" onclick="selectCategory('A')">A</button>
+                <button class="category" onclick="selectCategory('B')">B</button>
+                <button class="category" onclick="selectCategory('C')">C</button>
+                <button class="category" onclick="selectCategory('D')">D</button>
+                <button class="category" onclick="selectCategory('E')">E</button>
+                <button class="category" onclick="selectCategory('F')">F</button>
+                <button class="category" onclick="selectCategory('G')">G</button>
+                <button class="category" onclick="selectCategory('H')">H</button>
+            </div>
+        </div>
+        <div id="step-select-antiguedad" class="step-box" style="display:none;">
+            <p>Selecciona tus Años de Antigüedad:</p>
+            <div id="antiguedad-options" class="btn-group"></div>
+        </div>
+        <div id="step-adicional-basico" class="step-box" style="display:none;">
+            <p>Ingresa el porcentaje de tu adicional sobre básico:</p>
+            <div class="input-group">
+                <input type="number" id="input-adicional-basico" min="0" max="100" step="0.1" placeholder="Ej: 15.5">
+                <span>%</span>
+                <button onclick="selectAdicionalBasico()">Confirmar</button>
+            </div>
+        </div>
+        <div id="step-extra-hours" class="step-box" style="display: none;">
+            <p>¿Realizaste horas extras hoy?</p>
+            <div class="btn-group">
+                <button onclick="handleExtraHours(true)">Sí</button>
+                <button class="secondary" onclick="handleExtraHours(false)">No</button>
+            </div>
+            <div class="input-group" id="extra-hours-input-group" style="display: none;">
+                <label for="input-extra-hours">¿Cuántas horas extras?</label>
+                <input type="number" id="input-extra-hours" min="1" max="16" value="1">
+                <button onclick="registerExtraHours()">Confirmar Extras</button>
+            </div>
+        </div>
+
+        <div id="quincena-display">
+            <p>Calculando salario de quincena...</p>
+        </div>
+        <p id="result"></p>
+        <button id="toggle-details-btn" onclick="toggleCalculationDetails()" style="display:none; margin: 10px 0;">Mostrar Detalles</button>
+        <div id="calculation-details" style="display:none; background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace;"></div>
+        <div id="history">
+            <h2>Historial de Registros</h2>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+    
+    <div id="multiDayScheduleModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeMultiDayScheduleModal()">&times;</span>
+            <h2>Aplicar Horario a Múltiples Días</h2>
+            <p>Días seleccionados: <span id="multi-day-selected-dates-display">0</span></p>
+            <div class="form-group">
+                <label for="multi-turno-select">Turno:</label>
+                <select id="multi-turno-select">
+                    <option value="">Selecciona un turno</option>
+                    <option value="manana">Mañana</option>
+                    <option value="tarde">Tarde</option>
+                    <option value="noche">Noche</option>
+                    <option value="feriado">Feriado</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="multi-entrada-input">Hora de Entrada:</label>
+                <input type="time" id="multi-entrada-input">
+            </div>
+            <div class="form-group">
+                <label for="multi-salida-input">Hora de Salida:</label>
+                <input type="time" id="multi-salida-input">
+            </div>
+            <div class="form-group">
+                <label for="multi-category-select">Categoría:</label>
+                <select id="multi-category-select">
+                    <option value="">Selecciona categoría</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="H">H</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="multi-antiguedad-select">Antigüedad (años):</label>
+                <select id="multi-antiguedad-select">
+                    <option value="">Selecciona antigüedad</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="multi-extra-hours-input">Horas Extras:</label>
+                <input type="number" id="multi-extra-hours-input" min="0" max="16" value="0">
+            </div>
+            <div class="form-group">
+                <label for="multi-ausencia-checkbox">Ausencia por tardanza (marca si aplica):</label>
+                <input type="checkbox" id="multi-ausencia-checkbox">
+            </div>
+            <div class="form-group" id="multi-late-minutes-group" style="display: none;">
+                <label for="multi-late-minutes-input">Minutos de tardanza (si aplica):</label>
+                <input type="number" id="multi-late-minutes-input" min="1" value="1">
+            </div>
+            <button onclick="applyMultiDaySchedule()">Aplicar Horario</button>
+            <button class="secondary" onclick="clearSelectedDatesAndCloseModal()">Limpiar Selección y Cerrar</button>
+        </div>
+    </div>
+    <script src="utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
